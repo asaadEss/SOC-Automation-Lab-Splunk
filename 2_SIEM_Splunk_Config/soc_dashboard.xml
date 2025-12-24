@@ -1,0 +1,40 @@
+<dashboard version="1.1" theme="dark">
+  <label>🛡️ SOC Live Monitor - Pipeline Unifié</label>
+  <description>Surveillance Temps Réel : Détection Scan (UFW) et Intrusion (SSH)</description>
+  <row>
+    <panel>
+      <title>⚡ Chronologie des Attaques (Temps Réel)</title>
+      <chart>
+        <search>
+          <query><![CDATA[index=main ("Failed password" OR "UFW BLOCK") 
+| eval Type_Attaque=case(searchmatch("Failed password"), "Brute Force SSH", searchmatch("UFW BLOCK"), "Scan de Port") 
+| timechart span=10s count by Type_Attaque]]></query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>🎯 Top Attaquants Identifiés</title>
+      <table>
+        <search>
+          <query><![CDATA[index=main ("Failed password" OR "SRC=") 
+| rex field=_raw "from (?<ip_ssh>\d+\.\d+\.\d+\.\d+)" 
+| rex field=_raw "SRC=(?<ip_scan>\d+\.\d+\.\d+\.\d+)" 
+| eval Attaquant=coalesce(ip_ssh, ip_scan) 
+| stats count as "Tentatives", values(sourcetype) as "Source" by Attaquant 
+| sort - "Tentatives"]]></query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>

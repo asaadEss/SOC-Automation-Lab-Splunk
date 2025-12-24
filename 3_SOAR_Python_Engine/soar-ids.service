@@ -1,0 +1,13 @@
+[Unit]
+Description=SOAR IDS Engine V2 (Python)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+# Adapte le chemin ci-dessous si besoin
+ExecStart=/usr/bin/python3 /home/asaad/SOC-Automation-Project/3_SOAR_Python_Engine/soar_engine.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
